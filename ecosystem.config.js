@@ -8,5 +8,9 @@ module.exports = {
 			name: 'loader',
 			script: 'loader.js',
 		},
+		{
+			name: 'tracker',
+			script: 'tracker.js',
+		},
 	],
 };
