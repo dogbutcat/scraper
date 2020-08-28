@@ -8,4 +8,5 @@ case $MODE in
     all) ./node_modules/.bin/pm2-runtime start ecosystem.config.js;;
     scraper) npm run scraper;;
     loader) npm run loader;;
+    tracker) npm run tracker;;
 esac

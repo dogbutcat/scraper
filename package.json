@@ -46,6 +46,7 @@
 		"pm2": "./node_modules/.bin/pm2 start ecosystem.config.js",
 		"prettify": "prettier --config ./.prettierrc.json --write \"src/*.js\"",
 		"scraper": "node ./scraper.js",
+		"tracker": "node ./tracker.js",
 		"staged": "lint-staged",
 		"upgrade": "yarn migrate"
 	},
