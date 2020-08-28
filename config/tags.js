@@ -50,6 +50,26 @@ module.exports = [
 		type: 'doc',
 	},
 	{
+		includes: 'pdf',
+		tag: 'pdf',
+		type: 'doc',
+	},
+	{
+		includes: 'apk',
+		tag: 'android',
+		type: 'software',
+	},
+	{
+		includes: 'pkg',
+		tag: 'macos',
+		type: 'software',
+	},
+	{
+		includes: 'dmg',
+		tag: 'macos',
+		type: 'software',
+	},
+	{
 		match: /season|episode|s[0-9]{2}e[0-9]{2}/iu,
 		tag: 'show',
 		type: 'video',

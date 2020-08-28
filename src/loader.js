@@ -2,7 +2,7 @@
 const config = require('./../config');
 const elasticsearch = require('elasticsearch');
 
-const client = new elasticsearch.Client({ host: `${config.elasticsearch.host}:${config.elasticsearch.port}` });
+const client = new elasticsearch.Client({ host: [config.elasticsearch] });
 const knex = require('knex')(config.db);
 
 const getRecords = () =>
@@ -45,7 +45,7 @@ const update = async (records) => {
 				update: {
 					_id: record.infohash,
 					_index: 'torrents',
-					//_retry_on_conflict: 3,
+					// _retry_on_conflict: 3,
 					_type: 'hash',
 				},
 			},
@@ -62,7 +62,7 @@ const update = async (records) => {
 	if (response.errors) {
 		const errors = response.items.filter((item) => item.update.error);
 
-		console.log(errors);
+		console.log('[ERROR] ELASTIC: ', errors);
 	}
 
 	await knex('torrents')
@@ -70,7 +70,10 @@ const update = async (records) => {
 			searchUpdate: true,
 			searchUpdated: new Date(),
 		})
-		.whereIn('infohash', records.map(({ infohash }) => infohash));
+		.whereIn(
+			'infohash',
+			records.map(({ infohash }) => infohash),
+		);
 };
 
 const loader = async () => {

@@ -2,6 +2,8 @@ const bencode = require('bencode');
 const config = require('./../config');
 const crypto = require('crypto');
 const dgram = require('dgram');
+const fs = require('fs');
+const path = require('path');
 
 const decodeNodes = (data) => {
 	const nodes = [];
@@ -40,7 +42,16 @@ const safe = (fn) => (...params) => {
 
 const TID_LENGTH = 4;
 const TOKEN_LENGTH = 2;
-const clientID = getRandomID();
+let clientID;
+const clientIDFile = path.resolve(__dirname, '../config/clientID');
+
+if (fs.existsSync(clientIDFile)) {
+	clientID = new Uint8Array(fs.readFileSync(clientIDFile));
+} else {
+	clientID = getRandomID();
+	fs.writeFileSync(clientIDFile, clientID);
+}
+
 const serverSocket = dgram.createSocket('udp4');
 let nodes = [];
 let onTorrent = (torrent) => console.log(torrent);
@@ -129,7 +140,7 @@ const start = () => {
 	nodes = nodes.concat(config.bootstrapNodes);
 	makeNeighbours();
 
-	setTimeout(() => start(), 1000);
+	setTimeout(() => start(), config.crawler.frequency * 1000);
 };
 
 const onListening = () => {

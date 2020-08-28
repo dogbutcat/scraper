@@ -1,9 +1,12 @@
-FROM node:8-alpine
+FROM node:10-alpine
 
 ADD . /scraper
 WORKDIR /scraper
 
-RUN yarn \
- && yarn global add pm2
+RUN npm install --production
 
-CMD ["/usr/local/bin/pm2-runtime", "start", "ecosystem.config.js"]
+EXPOSE 6881/udp
+ENV MODE=all
+
+# CMD ["/usr/local/bin/pm2-runtime", "start", "ecosystem.config.js"]
+ENTRYPOINT [ "scripts/start.sh" ]

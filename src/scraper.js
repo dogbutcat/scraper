@@ -4,6 +4,8 @@ const parser = require('./parser');
 const tracker = require('./tracker');
 const knex = require('knex')(config.db);
 
+const fillNum = (num) => `00${num}`.slice(-2);
+
 const getCount = async () => {
 	const [count] = await knex('torrents').count('infohash');
 	const [count2] = await knex('torrents')
@@ -13,9 +15,18 @@ const getCount = async () => {
 		.count('infohash')
 		.whereNull('searchUpdated');
 
-	console.log(`Total Torrents: ${count['count(`infohash`)']}`);
-	console.log(`Torrents without Tracker: ${count2['count(`infohash`)']}`);
-	console.log(`Torrents not in Search: ${count3['count(`infohash`)']}`);
+	if (config.summary) {
+		const time = new Date();
+
+		console.log(
+			`${time.getFullYear()}-${fillNum(time.getMonth())}-${fillNum(time.getDate())} ${fillNum(
+				time.getHours(),
+			)}:${fillNum(time.getMinutes())}:${fillNum(time.getSeconds())}`,
+		);
+		console.log(`Total Torrents: ${count['count(`infohash`)']}`);
+		console.log(`Torrents without Tracker: ${count2['count(`infohash`)']}`);
+		console.log(`Torrents not in Search: ${count3['count(`infohash`)']}`);
+	}
 	setTimeout(() => getCount(), 10000);
 };
 

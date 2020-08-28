@@ -9,6 +9,7 @@ const config = {
 	],
 	crawler: {
 		address: '0.0.0.0',
+		frequency: 4,
 		port: 6881,
 	},
 	db: {
@@ -24,13 +25,14 @@ const config = {
 		connection: {
 			database: 'alphareign',
 			host: '127.0.0.1',
-			password: 'alphareign',
+			password: '123456',
 			user: 'root',
 		},
 	},
 	debug: false,
 	elasticsearch: {
 		host: '127.0.0.1',
+		// auth: 'elastic:elastic',
 		port: 9200,
 	},
 	filters,
@@ -41,6 +43,7 @@ const config = {
 		// Amount of torrents to update in elasticsearch at once
 		limit: 1000,
 	},
+	summary: true,
 	tags,
 	tracker: {
 		// Minutes before we should try and update a torrent again
@@ -49,6 +52,12 @@ const config = {
 		frequency: 1,
 		host: 'udp://tracker.coppersurfer.tk:6969/announce',
 		limit: 75,
+		remoteHosts: [
+			'https://trackerslist.com/all.txt',
+			'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt',
+		],
+		// Remote track age in days
+		remoteTrackAge: 2,
 	},
 };
 

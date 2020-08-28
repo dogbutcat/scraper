@@ -50,7 +50,9 @@ module.exports = {
 		'pdb',
 		'oxps',
 		'xps',
+		'pdf',
 	],
+	game: ['skidrow', 'codex', 'cpy'],
 	software: [
 		'exe',
 		'apk',
@@ -68,6 +70,8 @@ module.exports = {
 		'cs',
 		'cpp',
 		'class',
+		'dmg',
+		'pkg',
 	],
 	video: [
 		'3g2',
