@@ -6,12 +6,14 @@ const https = require('https');
 let remoteTrackData = [null, null];
 
 function batchUpdateRecords(knex, records) {
-	const infoHashes = [];
+	const hashes = Object.keys(records);
+	const hashLen = hashes.length,
+		infoHashes = [];
 	let leecherWhen = '',
 		seederWhen = '';
 
-	for (let i = 0; i < records.length; i += 1) {
-		const record = records[i];
+	for (let i = 0; i < hashLen; i += 1) {
+		const record = records[hashes[i]];
 
 		leecherWhen += `WHEN '${record.infoHash}' THEN ${record.incomplete} `;
 		seederWhen += `WHEN '${record.infoHash}' THEN ${record.complete} `;
@@ -25,10 +27,10 @@ function batchUpdateRecords(knex, records) {
 			END, 
 			seeders = CASE infohash 
 				${seederWhen}
-            END,
-            searchUpdate = ?,
-            trackerUpdated = ?
-        WHERE infoHash in (?)
+			END,
+			searchUpdate = ?,
+			trackerUpdated = ?
+		WHERE infoHash in (?)
 	`,
 		[false, new Date(), infoHashes],
 	);
