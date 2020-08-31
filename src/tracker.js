@@ -5,6 +5,35 @@ const https = require('https');
 // [0] is date, [1] is announce data
 let remoteTrackData = [null, null];
 
+function batchUpdateRecords(knex, records) {
+	const infoHashes = [];
+	let leecherWhen = '',
+		seederWhen = '';
+
+	for (let i = 0; i < records.length; i += 1) {
+		const record = records[i];
+
+		leecherWhen += `WHEN '${record.infoHash}' THEN ${record.incomplete} `;
+		seederWhen += `WHEN '${record.infoHash}' THEN ${record.complete} `;
+		infoHashes.push(`${record.infoHash}`);
+	}
+	return knex.raw(
+		`
+		UPDATE torrents
+			SET leechers = CASE infohash 
+				${leecherWhen}
+			END, 
+			seeders = CASE infohash 
+				${seederWhen}
+            END,
+            searchUpdate = ?,
+            trackerUpdated = ?
+        WHERE infoHash in (?)
+	`,
+		[false, new Date(), infoHashes],
+	);
+}
+
 const updateRecord = async (knex, record) => {
 	if (config.debug) {
 		console.log(`${record.infoHash} - ${record.complete}:${record.incomplete}`);
@@ -83,17 +112,15 @@ const scrape = async (knex, records) => {
 			Client.scrape(options, (error, data) => (error ? reject(error) : resolve(data)));
 		});
 
+		console.log('Scrape Success: ', results.infoHash || Object.keys(results).length);
 		if (results.infoHash) {
 			await updateRecord(knex, results);
 		} else {
-			const hashes = Object.keys(results);
-
-			for (let i = 0; i < hashes.length; i += 1) {
-				await updateRecord(knex, results[hashes[i]]); // eslint-disable-line no-await-in-loop
-			}
+			await batchUpdateRecords(knex, results);
 		}
 	} catch (error) {
 		// Do nothing
+		console.log('Scrape Error: ', error);
 	}
 };
 
