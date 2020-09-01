@@ -14,20 +14,17 @@ const getCount = async () => {
 	const [count3] = await knex('torrents')
 		.count('infohash')
 		.whereNull('searchUpdated');
+	const time = new Date();
 
-	if (config.summary) {
-		const time = new Date();
-
-		console.log(
-			`${time.getFullYear()}-${fillNum(time.getMonth())}-${fillNum(time.getDate())} ${fillNum(
-				time.getHours(),
-			)}:${fillNum(time.getMinutes())}:${fillNum(time.getSeconds())}`,
-		);
-		console.log(`Total Torrents: ${count['count(`infohash`)']}`);
-		console.log(`Torrents without Tracker: ${count2['count(`infohash`)']}`);
-		console.log(`Torrents not in Search: ${count3['count(`infohash`)']}`);
-	}
-	setTimeout(() => getCount(), 10000);
+	console.log(
+		`${time.getFullYear()}-${fillNum(time.getMonth())}-${fillNum(time.getDate())} ${fillNum(
+			time.getHours(),
+		)}:${fillNum(time.getMinutes())}:${fillNum(time.getSeconds())}`,
+	);
+	console.log(`Total Torrents: ${count['count(`infohash`)']}`);
+	console.log(`Torrents without Tracker: ${count2['count(`infohash`)']}`);
+	console.log(`Torrents not in Search: ${count3['count(`infohash`)']}`);
+	setTimeout(() => getCount(), 60000);
 };
 
 const addTorrent = async (infohash, rinfo) => {
@@ -46,4 +43,6 @@ const addTorrent = async (infohash, rinfo) => {
 
 crawler(addTorrent);
 // tracker(knex);
-getCount();
+if (config.summary) {
+	getCount();
+}
