@@ -114,12 +114,12 @@ const scrape = async (knex, records) => {
 			Client.scrape(options, (error, data) => (error ? reject(error) : resolve(data)));
 		});
 
-		console.log('Scrape Success: ', results.infoHash || Object.keys(results).length);
 		if (results.infoHash) {
 			await updateRecord(knex, results);
 		} else {
 			await batchUpdateRecords(knex, results);
 		}
+		console.log('Scrape Success: ', results.infoHash || JSON.stringify(Object.keys(results)));
 	} catch (error) {
 		// Do nothing
 		console.log('Scrape Error: ', error);
@@ -130,12 +130,14 @@ const getRecords = async (knex) => {
 	const newRecords = await knex('torrents')
 		.select('infohash')
 		.whereNull('trackerUpdated')
+		.orderBy('created', 'desc')
 		.limit(config.tracker.limit);
 	const newLimit = config.tracker.limit - newRecords.length;
 	const age = new Date(Date.now() - 1000 * 60 * config.tracker.age);
 	const outdatedRecords = await knex('torrents')
 		.select('infohash')
 		.where('trackerUpdated', '<', age)
+		.orderBy('created', 'desc')
 		.limit(newLimit);
 
 	return [...newRecords, ...outdatedRecords];
