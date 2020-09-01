@@ -59,7 +59,6 @@ const upsertTorrent = async (torrent, knex) => {
 	try {
 		const records = await knex('torrents').where({ infohash: torrent.infohash });
 
-		console.log(`${torrent.infohash} - ${records.length > 0 ? 'Updated' : 'Inserted'}`);
 		if (records.length > 0) {
 			await knex('torrents')
 				.update(Object.assign(torrent, { updated: new Date() }))
@@ -68,6 +67,9 @@ const upsertTorrent = async (torrent, knex) => {
 			await knex('torrents')
 				.insert(Object.assign(torrent, { created: new Date(), updated: new Date() }))
 				.where({ infohash: torrent.infohash });
+		}
+		if (config.debug) {
+			console.log(`${torrent.infohash} - ${records.length > 0 ? 'Updated' : 'Inserted'}`);
 		}
 	} catch (error) {
 		if (config.debug) {
