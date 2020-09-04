@@ -53,7 +53,8 @@ const config = {
 		host: 'udp://tracker.coppersurfer.tk:6969/announce',
 		limit: 75,
 		remoteHosts: [
-			'https://trackerslist.com/all.txt',
+			//	contain ipv6 tracker
+			//	'https://trackerslist.com/all.txt',
 			'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt',
 		],
 		// Remote track age in days

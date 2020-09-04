@@ -3,9 +3,8 @@ const config = require('./../config');
 const elasticsearch = require('elasticsearch');
 
 const client = new elasticsearch.Client({ host: [config.elasticsearch] });
-const knex = require('knex')(config.db);
 
-const getRecords = () =>
+const getRecords = (knex) =>
 	knex('torrents')
 		.where({ searchUpdate: false })
 		.limit(config.search.limit);
@@ -36,7 +35,7 @@ const parseRecord = (record) => {
 	return parsedRecord;
 };
 
-const update = async (records) => {
+const update = async (knex, records) => {
 	const parsedRecords = records.filter(({ name }) => Boolean(name)).map(parseRecord);
 	const body = parsedRecords.reduce(
 		(result, record) => [
@@ -76,12 +75,12 @@ const update = async (records) => {
 		);
 };
 
-const loader = async () => {
-	const records = await getRecords();
+const loader = async (knex) => {
+	const records = await getRecords(knex);
 
 	if (records.length > 0) {
 		try {
-			await update(records);
+			await update(knex, records);
 		} catch (error) {
 			console.log(error);
 			// Do nothing
@@ -91,4 +90,4 @@ const loader = async () => {
 	setTimeout(() => loader(knex), config.search.frequency * 1000);
 };
 
-loader();
+module.exports = loader;

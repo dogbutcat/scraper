@@ -146,6 +146,10 @@ const getRecords = async (knex) => {
 const tracker = async (knex) => {
 	const records = await getRecords(knex);
 
+	if (config.debug) {
+		console.log('[TRACKER]: records has ', JSON.stringify(records));
+	}
+
 	if (records.length > 0) {
 		try {
 			await scrape(knex, records);

@@ -41,12 +41,12 @@
 	"scripts": {
 		"clean": "yarn lint && yarn prettify",
 		"lint": "eslint src/*.js --fix",
-		"loader": "node ./loader.js",
+		"loader": "./node_modules/.bin/pm2-runtime start ./loader.js",
 		"migrate": "./node_modules/.bin/knex migrate:latest",
-		"pm2": "./node_modules/.bin/pm2 start ecosystem.config.js",
+		"pm2": "./node_modules/.bin/pm2 start all.js",
 		"prettify": "prettier --config ./.prettierrc.json --write \"src/*.js\"",
-		"scraper": "node ./scraper.js",
-		"tracker": "node ./tracker.js",
+		"scraper": "./node_modules/.bin/pm2-runtime start ./scraper.js",
+		"tracker": "./node_modules/.bin/pm2-runtime start ./tracker.js",
 		"staged": "lint-staged",
 		"upgrade": "yarn migrate"
 	},

@@ -2,7 +2,7 @@ const config = require('./../config');
 const crawler = require('./crawler');
 const parser = require('./parser');
 // const tracker = require('./tracker');
-const knex = require('knex')(config.db);
+let knex;
 
 const fillNum = (num) => `00${num}`.slice(-2);
 
@@ -41,8 +41,13 @@ const addTorrent = async (infohash, rinfo) => {
 	}
 };
 
-crawler(addTorrent);
-// tracker(knex);
-if (config.summary) {
-	getCount();
-}
+const scrape = (db) => {
+	knex = db;
+	crawler(addTorrent);
+	// tracker(knex);
+	if (config.summary) {
+		getCount();
+	}
+};
+
+module.exports = scrape;
