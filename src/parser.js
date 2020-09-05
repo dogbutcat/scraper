@@ -57,19 +57,17 @@ const getTags = (names, type) =>
 
 const upsertTorrent = async (torrent, knex) => {
 	try {
-		const records = await knex('torrents').where({ infohash: torrent.infohash });
+		const { infohash, name, files, tags, type, length } = torrent,
+			time = new Date();
 
-		if (records.length > 0) {
-			await knex('torrents')
-				.update(Object.assign(torrent, { updated: new Date() }))
-				.where({ infohash: torrent.infohash });
-		} else {
-			await knex('torrents')
-				.insert(Object.assign(torrent, { created: new Date(), updated: new Date() }))
-				.where({ infohash: torrent.infohash });
-		}
+		await knex.raw(
+			`
+			INSERT INTO torrents (infohash, name, files, tags, type, length, created, updated) 
+				value (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE updated=?`,
+			[infohash, name, files, tags, type, length, time, time, time],
+		);
 		if (config.debug) {
-			console.log(`${torrent.infohash} - ${records.length > 0 ? 'Updated' : 'Inserted'}`);
+			console.log(`${torrent.infohash} - Upsetted`);
 		}
 	} catch (error) {
 		if (config.debug) {

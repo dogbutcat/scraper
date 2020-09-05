@@ -127,20 +127,16 @@ const scrape = async (knex, records) => {
 };
 
 const getRecords = async (knex) => {
-	const newRecords = await knex('torrents')
+	// combine 2 search into one for db query speedup with large data.
+	const age = new Date(Date.now() - 1000 * 60 * config.tracker.age);
+	const recordResults = await knex('torrents')
 		.select('infohash')
 		.whereNull('trackerUpdated')
+		.orWhere('trackerUpdated', '<', age)
 		.orderBy('created', 'desc')
 		.limit(config.tracker.limit);
-	const newLimit = config.tracker.limit - newRecords.length;
-	const age = new Date(Date.now() - 1000 * 60 * config.tracker.age);
-	const outdatedRecords = await knex('torrents')
-		.select('infohash')
-		.where('trackerUpdated', '<', age)
-		.orderBy('created', 'desc')
-		.limit(newLimit);
 
-	return [...newRecords, ...outdatedRecords];
+	return [...recordResults];
 };
 
 const tracker = async (knex) => {
