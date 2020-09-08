@@ -2,13 +2,22 @@ const Wire = require('./wire');
 const config = require('./../config');
 const net = require('net');
 
-const clean = (data) => {
+const clean = (data, bufferEncoding = 'utf8') => {
 	if (Buffer.isBuffer(data)) {
-		return data.toString();
+		return data.toString(bufferEncoding);
 	} else if (Array.isArray(data)) {
 		return data.map(clean);
 	} else if (typeof data === 'object') {
-		return Object.keys(data).reduce((result, key) => Object.assign(result, { [key]: clean(data[key]) }), {});
+		return Object.keys(data).reduce((result, key) => {
+			let val;
+
+			if (key === 'ed2k' || key === 'filehash') {
+				val = clean(data[key], 'hex');
+			} else {
+				val = clean(data[key]);
+			}
+			return Object.assign(result, { [key]: val });
+		}, {});
 	}
 
 	return data;
