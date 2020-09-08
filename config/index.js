@@ -27,6 +27,8 @@ const config = {
 			host: '127.0.0.1',
 			password: '123456',
 			user: 'root',
+			// insert emoji into db
+			charset: 'utf8mb4',
 		},
 	},
 	debug: false,
