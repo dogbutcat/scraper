@@ -6,7 +6,7 @@ const clean = (data, bufferEncoding = 'utf8') => {
 	if (Buffer.isBuffer(data)) {
 		return data.toString(bufferEncoding);
 	} else if (Array.isArray(data)) {
-		return data.map(clean);
+		return data.map((val) => clean(val));
 	} else if (typeof data === 'object') {
 		return Object.keys(data).reduce((result, key) => {
 			let val;
