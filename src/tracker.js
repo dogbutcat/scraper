@@ -4,6 +4,8 @@ const https = require('https');
 
 // [0] is date, [1] is announce data
 let remoteTrackData = [null, null];
+// not scraped infohash
+const notFoundTrackerInfoHash = [''];
 
 function batchUpdateRecords(knex, records) {
 	const hashes = Object.keys(records);
@@ -101,6 +103,26 @@ const getCacheTracker = () => {
 	return getRemoteTracker(date);
 };
 
+const matchInfoHash = (records, results) => {
+	const infoHashes = records.map(({ infohash }) => infohash);
+	const scrapedResult = results.infoHash ? [results.infoHash] : Object.keys(results);
+	let ret = {};
+
+	const filteredResult = scrapedResult.filter((data) => {
+		if (infoHashes.indexOf(data) > -1) {
+			return true;
+		}
+		notFoundTrackerInfoHash.push(data);
+		return false;
+	});
+
+	filteredResult.forEach((val) => {
+		results.infoHash ? (ret = results) : (ret[val] = results[val]);
+	});
+	console.log('Scrape Without: ', notFoundTrackerInfoHash.join(','));
+	return ret;
+};
+
 const scrape = async (knex, records) => {
 	const announce = await getCacheTracker();
 
@@ -114,12 +136,14 @@ const scrape = async (knex, records) => {
 			Client.scrape(options, (error, data) => (error ? reject(error) : resolve(data)));
 		});
 
-		if (results.infoHash) {
-			await updateRecord(knex, results);
-		} else {
-			await batchUpdateRecords(knex, results);
+		const matched = matchInfoHash(records, results);
+
+		if (matched.infoHash) {
+			await updateRecord(knex, matched);
+		} else if (Object.keys(matched).length > 1) {
+			await batchUpdateRecords(knex, matched);
 		}
-		console.log('Scrape Success: ', results.infoHash || JSON.stringify(Object.keys(results)));
+		console.log('Scrape Success: ', JSON.stringify(Object.keys(matched)));
 	} catch (error) {
 		// Do nothing
 		console.log('Scrape Error: ', error);
@@ -133,6 +157,7 @@ const getRecords = async (knex) => {
 		.select('infohash')
 		.whereNull('trackerUpdated')
 		.orWhere('trackerUpdated', '<', age)
+		.whereNotIn('infohash', notFoundTrackerInfoHash)
 		.orderBy('created', 'desc')
 		.limit(config.tracker.limit);
 
