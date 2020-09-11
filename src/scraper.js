@@ -7,13 +7,11 @@ let knex;
 const fillNum = (num) => `00${num}`.slice(-2);
 
 const getCount = async () => {
-	const [count] = await knex('torrents').count('infohash');
-	const [count2] = await knex('torrents')
-		.count('infohash')
-		.whereNull('trackerUpdated');
-	const [count3] = await knex('torrents')
-		.count('infohash')
-		.whereNull('searchUpdated');
+	const [{ allCounts: count, noTrackerCounts: count2, noLoadCounts: count3 }] = await knex('torrents').select(
+		knex.raw(
+			'SUM(1) AS allCounts, SUM(IF(trackerUpdated IS NULL, 1, 0)) AS noTrackerCounts, SUM(IF(searchUpdated IS NULL,1,0)) AS noLoadCounts',
+		),
+	);
 	const time = new Date();
 
 	console.log(
@@ -21,10 +19,10 @@ const getCount = async () => {
 			time.getHours(),
 		)}:${fillNum(time.getMinutes())}:${fillNum(time.getSeconds())}`,
 	);
-	console.log(`Total Torrents: ${count['count(`infohash`)']}`);
-	console.log(`Torrents without Tracker: ${count2['count(`infohash`)']}`);
-	console.log(`Torrents not in Search: ${count3['count(`infohash`)']}`);
-	setTimeout(() => getCount(), 60000);
+	console.log(`Total Torrents: ${count}`);
+	console.log(`Torrents without Tracker: ${count2}`);
+	console.log(`Torrents not in Search: ${count3}`);
+	setTimeout(() => getCount(), 60 * 1000);
 };
 
 const addTorrent = async (infohash, rinfo) => {
