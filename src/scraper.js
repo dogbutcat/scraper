@@ -27,11 +27,11 @@ const getCount = async () => {
 
 const addTorrent = async (infohash, rinfo) => {
 	try {
-		const records = await knex('torrents').where({ infohash: infohash.toString('hex') });
+// 		const records = await knex('torrents').where({ infohash: infohash.toString('hex') });
 
-		if (records.length === 0 || !records[0].name) {
+// 		if (records.length === 0 || !records[0].name) {
 			parser(infohash, rinfo, knex);
-		}
+// 		}
 	} catch (error) {
 		if (config.debug) {
 			console.log(error);
