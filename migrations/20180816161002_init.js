@@ -5,10 +5,10 @@ exports.up = async (knex) => {
 		table.collate('utf8mb4_unicode_ci');
 		table.string('infohash', 40).primary();
 		table.string('name');
-		table.text('files');
+		table.text('files', 'longtext');
 		table.string('tags');
 		table.string('type');
-		table.integer('length');
+		table.bigInteger('length');
 		table.dateTime('created');
 		table.dateTime('updated');
 	});
