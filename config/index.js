@@ -9,6 +9,8 @@ const config = {
 	],
 	crawler: {
 		address: '0.0.0.0',
+		bulkFreq: 20,
+		enableBulk: true,
 		frequency: 4,
 		port: 6881,
 	},
@@ -23,12 +25,12 @@ const config = {
 		 */
 		client: 'mysql',
 		connection: {
+			charset: 'utf8mb4',
 			database: 'alphareign',
 			host: '127.0.0.1',
 			password: '123456',
 			user: 'root',
 			// insert emoji into db
-			charset: 'utf8mb4',
 		},
 	},
 	debug: false,

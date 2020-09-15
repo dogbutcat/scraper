@@ -2,6 +2,8 @@ const Wire = require('./wire');
 const config = require('./../config');
 const net = require('net');
 
+const torrentQueue = [];
+
 const clean = (data, bufferEncoding = 'utf8') => {
 	if (Buffer.isBuffer(data)) {
 		return data.toString(bufferEncoding);
@@ -85,6 +87,37 @@ const upsertTorrent = async (torrent, knex) => {
 	}
 };
 
+const bulkUpsertTorrents = async (knex) => {
+	try {
+		const spliceTorrents = torrentQueue.splice(0);
+		const itemsString = spliceTorrents.map(({ infohash, name, files, tags, type, length }) => {
+			const time = new Date();
+
+			return `(${[infohash, name, files, tags, type, length, time, time].join(',')})`;
+		});
+
+		const time = new Date();
+
+		await knex.raw(
+			`
+			INSERT INTO torrents (infohash, name, files, tags, type, length, created, updated) 
+				VALUES ${itemsString.join(',')} ON DUPLICATE KEY UPDATE updated=?`,
+			[time],
+		);
+		if (config.debug) {
+			console.log(`${spliceTorrents.length} Torrents Upsetted`);
+		}
+	} catch (error) {
+		if (config.debug) {
+			console.log(error);
+		}
+	}
+};
+
+const queueTorrents = (torrent) => {
+	torrentQueue.push(torrent);
+};
+
 const buildRecord = (names, knex, { files, infohash, name }) => {
 	try {
 		const type = getType(names);
@@ -99,7 +132,11 @@ const buildRecord = (names, knex, { files, infohash, name }) => {
 			type,
 		};
 
-		upsertTorrent(record, knex);
+		if (config.crawler.enableBulk) {
+			queueTorrents(record);
+		} else {
+			upsertTorrent(record, knex);
+		}
 	} catch (error) {
 		console.log(error);
 	}
@@ -151,4 +188,13 @@ const getMetadata = (infohash, rinfo, knex) => {
 	});
 };
 
-module.exports = getMetadata;
+const bulkInsertTorrentQueue = async (knex) => {
+	if (torrentQueue.length > 0) {
+		await bulkUpsertTorrents(knex);
+	}
+	setTimeout(async () => {
+		await bulkInsertTorrentQueue(knex);
+	}, config.crawler.bulkFreq || 30 * 1000);
+};
+
+module.exports = { bulkInsertTorrentQueue, getMetadata };

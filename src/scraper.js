@@ -25,13 +25,13 @@ const getCount = async () => {
 	setTimeout(() => getCount(), 60 * 1000);
 };
 
-const addTorrent = async (infohash, rinfo) => {
+const addTorrent = (infohash, rinfo) => {
 	try {
-// 		const records = await knex('torrents').where({ infohash: infohash.toString('hex') });
+		// 		const records = await knex('torrents').where({ infohash: infohash.toString('hex') });
 
-// 		if (records.length === 0 || !records[0].name) {
-			parser(infohash, rinfo, knex);
-// 		}
+		// 		if (records.length === 0 || !records[0].name) {
+		parser.getMetadata(infohash, rinfo, knex);
+		// 		}
 	} catch (error) {
 		if (config.debug) {
 			console.log(error);
@@ -45,6 +45,9 @@ const scrape = (db) => {
 	// tracker(knex);
 	if (config.summary) {
 		getCount();
+	}
+	if (config.crawler.enableBulk) {
+		parser.bulkInsertTorrentQueue(knex);
 	}
 };
 
