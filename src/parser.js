@@ -105,12 +105,11 @@ const bulkUpsertTorrents = async (knex) => {
 			[time],
 		);
 		if (config.debug) {
+			console.log('Insert Cost: ', Number(new Date()) - time);
 			console.log(`${spliceTorrents.length} Torrents Upsetted`);
 		}
 	} catch (error) {
-		if (config.debug) {
-			console.log(error);
-		}
+		console.log(error);
 	}
 };
 
@@ -192,9 +191,9 @@ const bulkInsertTorrentQueue = async (knex) => {
 	if (torrentQueue.length > 0) {
 		await bulkUpsertTorrents(knex);
 	}
-	setTimeout(async () => {
-		await bulkInsertTorrentQueue(knex);
-	}, config.crawler.bulkFreq || 30 * 1000);
+	setTimeout(() => {
+		bulkInsertTorrentQueue(knex);
+	}, (config.crawler.bulkFreq || 30) * 1000);
 };
 
 module.exports = { bulkInsertTorrentQueue, getMetadata };
