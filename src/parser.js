@@ -99,7 +99,7 @@ const upsertTorrent = async (torrent, knex) => {
 
 const bulkUpsertTorrents = async (knex) => {
 	try {
-		const spliceTorrents = torrentQueue.splice(0);
+		const spliceTorrents = torrentQueue.splice(0, config.crawler.bulkCount || 180);
 		const len = spliceTorrents.length;
 		const itemsString = spliceTorrents.map(({ infohash, name, files, tags, type, length }) => {
 			const time = new Date().toMysqlFormat();
