@@ -4,6 +4,16 @@ const net = require('net');
 
 const torrentQueue = [];
 
+const fillNum = (num) => `00${num}`.slice(-2);
+
+/* eslint-disable no-extend-native */
+Date.prototype.toMysqlFormat = function toMysqlFormat() {
+	return `${this.getUTCFullYear()}-${fillNum(1 + this.getUTCMonth())}-${fillNum(this.getUTCDate())} ${fillNum(
+		this.getUTCHours(),
+	)}:${fillNum(this.getUTCMinutes())}:${fillNum(this.getUTCSeconds())}.${this.getMilliseconds()}`;
+};
+/* eslint-enable no-extend-native */
+
 const clean = (data, bufferEncoding = 'utf8') => {
 	if (Buffer.isBuffer(data)) {
 		return data.toString(bufferEncoding);
@@ -91,7 +101,7 @@ const bulkUpsertTorrents = async (knex) => {
 	try {
 		const spliceTorrents = torrentQueue.splice(0);
 		const itemsString = spliceTorrents.map(({ infohash, name, files, tags, type, length }) => {
-			const time = new Date();
+			const time = new Date().toMysqlFormat();
 
 			return `(${[`'${infohash}'`, `'${name}'`, `'${files}'`, `'${tags}'`, `'${type}'`, length, time, time].join(
 				',',
