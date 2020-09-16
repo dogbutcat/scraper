@@ -100,13 +100,14 @@ const upsertTorrent = async (torrent, knex) => {
 const bulkUpsertTorrents = async (knex) => {
 	try {
 		const spliceTorrents = torrentQueue.splice(0);
+		const len = spliceTorrents.length;
 		const itemsString = spliceTorrents.map(({ infohash, name, files, tags, type, length }) => {
 			const time = new Date().toMysqlFormat();
 
 			return `(${[
 				`'${infohash}'`,
-				`'${name}'`,
-				`'${files}'`,
+				`'${name.replace(/'/gu, "\\'")}'`,
+				`'${files.replace(/'/gu, "\\'")}'`,
 				`'${tags}'`,
 				`'${type}'`,
 				length,
@@ -120,12 +121,11 @@ const bulkUpsertTorrents = async (knex) => {
 		await knex.raw(
 			`
 			INSERT INTO torrents (infohash, name, files, tags, type, length, created, updated) 
-				VALUES ${itemsString.join(',')} ON DUPLICATE KEY UPDATE updated=?`,
-			[time],
+				VALUES ${itemsString.join(',')} ON DUPLICATE KEY UPDATE updated=VALUES(updated)`,
 		);
+		console.log(`Bulk Insert Count: ${len}, Cost: ${(new Date() - time) / 1000} seconds`);
 		if (config.debug) {
-			console.log('Insert Cost: ', Number(new Date()) - time);
-			console.log(`${spliceTorrents.length} Torrents Upsetted`);
+			console.log(`${len} Torrents Upsetted`);
 		}
 	} catch (error) {
 		console.log(error);
