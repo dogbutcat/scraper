@@ -9,6 +9,7 @@ const config = {
 	],
 	crawler: {
 		address: '0.0.0.0',
+		bulkCount: 200,
 		bulkFreq: 20,
 		enableBulk: true,
 		frequency: 4,
