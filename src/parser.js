@@ -93,7 +93,7 @@ const bulkUpsertTorrents = async (knex) => {
 		const itemsString = spliceTorrents.map(({ infohash, name, files, tags, type, length }) => {
 			const time = new Date();
 
-			return `(${[`"${infohash}"`, `"${name}"`, `"${files}"`, `"${tags}"`, `"${type}"`, length, time, time].join(
+			return `(${[`'${infohash}'`, `'${name}'`, `'${files}'`, `'${tags}'`, `'${type}'`, length, time, time].join(
 				',',
 			)})`;
 		});
