@@ -5,6 +5,8 @@ const dgram = require('dgram');
 const fs = require('fs');
 const path = require('path');
 
+const parser = require('./parser');
+
 const decodeNodes = (data) => {
 	const nodes = [];
 
@@ -137,8 +139,11 @@ const makeNeighbours = () => {
 };
 
 const start = () => {
-	nodes = nodes.concat(config.bootstrapNodes);
-	makeNeighbours();
+	// queue is less than bulk insert count
+	if (parser.getQueueLength() < config.crawler.bulkCount) {
+		nodes = nodes.concat(config.bootstrapNodes);
+		makeNeighbours();
+	}
 
 	setTimeout(() => start(), config.crawler.frequency * 1000);
 };

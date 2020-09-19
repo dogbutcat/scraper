@@ -97,6 +97,10 @@ const upsertTorrent = async (torrent, knex) => {
 	}
 };
 
+const queueTorrents = (torrent) => torrentQueue.push(torrent);
+
+const getQueueLength = () => torrentQueue.length;
+
 const bulkUpsertTorrents = async (knex) => {
 	try {
 		const spliceTorrents = torrentQueue.splice(0, config.crawler.bulkCount > 0 ? config.crawler.bulkCount : 180);
@@ -124,7 +128,7 @@ const bulkUpsertTorrents = async (knex) => {
 				VALUES ${itemsString.join(',')} ON DUPLICATE KEY UPDATE updated=VALUES(updated)`,
 		);
 		console.log(
-			`Bulk Insert Count: ${len}, Pool Remaining: ${torrentQueue.length}, Cost: ${(new Date() - time) / 1000}s`,
+			`Bulk Insert Count: ${len}, Pool Remaining: ${getQueueLength()}, Cost: ${(new Date() - time) / 1000}s`,
 		);
 		if (config.debug) {
 			console.log(`${len} Torrents Upsetted`);
@@ -132,10 +136,6 @@ const bulkUpsertTorrents = async (knex) => {
 	} catch (error) {
 		console.log(error);
 	}
-};
-
-const queueTorrents = (torrent) => {
-	torrentQueue.push(torrent);
 };
 
 const buildRecord = (names, knex, { files, infohash, name }) => {
@@ -217,4 +217,4 @@ const bulkInsertTorrentQueue = async (knex) => {
 	}, (config.crawler.bulkFreq || 30) * 1000);
 };
 
-module.exports = { bulkInsertTorrentQueue, getMetadata };
+module.exports = { bulkInsertTorrentQueue, getMetadata, getQueueLength };
