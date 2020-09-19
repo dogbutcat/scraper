@@ -123,7 +123,9 @@ const bulkUpsertTorrents = async (knex) => {
 			INSERT INTO torrents (infohash, name, files, tags, type, length, created, updated) 
 				VALUES ${itemsString.join(',')} ON DUPLICATE KEY UPDATE updated=VALUES(updated)`,
 		);
-		console.log(`Bulk Insert Count: ${len}, Cost: ${(new Date() - time) / 1000} seconds`);
+		console.log(
+			`Bulk Insert Count: ${len}, Pool Remaining: ${torrentQueue.length}, Cost: ${(new Date() - time) / 1000}s`,
+		);
 		if (config.debug) {
 			console.log(`${len} Torrents Upsetted`);
 		}
