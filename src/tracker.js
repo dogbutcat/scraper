@@ -4,8 +4,9 @@ const https = require('https');
 
 // [0] is date, [1] is announce data
 let remoteTrackData = [null, null];
+let retryCount = 0;
 // not scraped infohash
-const notFoundTrackerInfoHash = [''];
+const notFoundTrackerInfoHash = new Set(['']);
 
 function batchUpdateRecords(knex, records) {
 	const hashes = Object.keys(records);
@@ -104,6 +105,8 @@ const getCacheTracker = () => {
 };
 
 const matchInfoHash = (records, results) => {
+	// reset retryCount
+	retryCount = 0;
 	const infoHashes = records.map(({ infohash }) => infohash);
 	const scrapedResult = results.infoHash ? [results.infoHash] : Object.keys(results);
 	let ret = {};
@@ -112,14 +115,14 @@ const matchInfoHash = (records, results) => {
 		if (infoHashes.indexOf(data) > -1) {
 			return true;
 		}
-		notFoundTrackerInfoHash.push(data);
+		!notFoundTrackerInfoHash.has(data) && notFoundTrackerInfoHash.add(data);
 		return false;
 	});
 
 	filteredResult.forEach((val) => {
 		results.infoHash ? (ret = results) : (ret[val] = results[val]);
 	});
-	console.log('Scrape Without: ', notFoundTrackerInfoHash.join(','));
+	console.log('Scrape Without: ', [...notFoundTrackerInfoHash]);
 	return ret;
 };
 
@@ -143,10 +146,17 @@ const scrape = async (knex, records) => {
 		} else if (Object.keys(matched).length > 1) {
 			await batchUpdateRecords(knex, matched);
 		}
-		console.log('Scrape Success: ', JSON.stringify(Object.keys(matched)));
 	} catch (error) {
-		// Do nothing
 		console.log('Scrape Error: ', error);
+		// eslint-disable-next-line no-use-before-define
+		retry(knex, records);
+	}
+};
+
+const retry = async (knex, records) => {
+	if (retryCount < config.tracker.retryTimes) {
+		retryCount += 1;
+		await scrape(knex, records);
 	}
 };
 
@@ -157,7 +167,7 @@ const getRecords = async (knex) => {
 		.select('infohash')
 		.whereNull('trackerUpdated')
 		.orWhere('trackerUpdated', '<', age)
-		.whereNotIn('infohash', notFoundTrackerInfoHash)
+		.whereNotIn('infohash', [...notFoundTrackerInfoHash])
 		.orderBy('created', 'desc')
 		.limit(config.tracker.limit);
 

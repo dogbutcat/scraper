@@ -64,6 +64,7 @@ const config = {
 		],
 		// Remote track age in days
 		remoteTrackAge: 2,
+		retryTimes: 2,
 	},
 };
 
