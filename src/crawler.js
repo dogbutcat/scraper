@@ -57,6 +57,7 @@ if (fs.existsSync(clientIDFile)) {
 const serverSocket = dgram.createSocket('udp4');
 let nodes = [];
 let onTorrent = (torrent) => console.log(torrent);
+let reserveOnTorrent;
 
 const sendMessage = safe((message, rinfo) => {
 	const buf = bencode.encode(message);
@@ -140,9 +141,13 @@ const makeNeighbours = () => {
 
 const start = () => {
 	// queue is less than bulk insert count
-	if (parser.getQueueLength() < config.crawler.bulkCount) {
+	if (parser.getQueueLength() < config.crawler.bulkCount * 2) {
+		onTorrent = reserveOnTorrent;
 		nodes = nodes.concat(config.bootstrapNodes);
 		makeNeighbours();
+	} else {
+		// eslint-disable-next-line no-empty-function
+		onTorrent = () => {};
 	}
 
 	setTimeout(() => start(), config.crawler.frequency * 1000);
@@ -161,7 +166,8 @@ const crawler = (fn) => {
 	serverSocket.on('error', handleError);
 
 	if (typeof fn === 'function') {
-		onTorrent = fn;
+		reserveOnTorrent = fn;
+		// onTorrent = fn;
 	}
 };
 
