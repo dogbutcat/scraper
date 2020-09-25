@@ -23,7 +23,7 @@ const clean = (data, bufferEncoding = 'utf8') => {
 		return Object.keys(data).reduce((result, key) => {
 			let val;
 
-			if (key === 'ed2k' || key === 'filehash') {
+			if (config.crawler.parseHexKeys.indexOf(key) > -1) {
 				val = clean(data[key], 'hex');
 			} else {
 				val = clean(data[key]);
