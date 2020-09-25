@@ -83,9 +83,9 @@ const upsertTorrent = async (torrent, knex) => {
 
 		await knex.raw(
 			`
-			INSERT INTO torrents (infohash, name, files, tags, type, length, created, updated) 
-				value (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE updated=?`,
-			[infohash, name, files, tags, type, length, time, time, time],
+			INSERT INTO torrents (infohash, name, files, tags, type, length, created, updated, timestamp) 
+				value (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE updated=?`,
+			[infohash, name, files, tags, type, length, time, time, Number(time), time],
 		);
 		if (config.debug) {
 			console.log(`${torrent.infohash} - Upsetted`);
@@ -117,6 +117,7 @@ const bulkUpsertTorrents = async (knex) => {
 				length,
 				`'${time}'`,
 				`'${time}'`,
+				`${Number(time)}`,
 			].join(',')})`;
 		});
 
@@ -124,7 +125,7 @@ const bulkUpsertTorrents = async (knex) => {
 
 		await knex.raw(
 			`
-			INSERT INTO torrents (infohash, name, files, tags, type, length, created, updated) 
+			INSERT INTO torrents (infohash, name, files, tags, type, length, created, updated, timestamp) 
 				VALUES ${itemsString.join(',')} ON DUPLICATE KEY UPDATE updated=VALUES(updated)`,
 		);
 		console.log(
