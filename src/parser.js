@@ -170,10 +170,11 @@ const onMetadata = function onMetadata(metadata, infohash, knex) {
 		const { files = [], length, name } = info;
 		const rebuildFiles = files.map((file) => {
 			const keys = Object.keys(file),
-				newFile = {};
+				newFile = {},
+				utfKey = 'path.utf-8';
 
-			if ('path.utf8' in file) {
-				file.path = file['path.utf8'];
+			if (utfKey in file) {
+				file.path = file[utfKey];
 			}
 			keys.forEach((k) => {
 				newFile[k] = config.crawler.reserveValue.indexOf(k) > -1 ? file[k] || '' : '';
