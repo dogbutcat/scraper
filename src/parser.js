@@ -164,15 +164,27 @@ const buildRecord = (names, knex, { files, infohash, name }) => {
 	}
 };
 
-const onMetadata = (metadata, infohash, knex) => {
+const onMetadata = function onMetadata(metadata, infohash, knex) {
 	try {
 		const { info = {} } = clean(metadata);
 		const { files = [], length, name } = info;
-		const names = files.map(({ path }) => (Array.isArray(path) ? path.join('/') : path)).concat(name);
-		const invalid = filterTorrent(names);
-		const filesWithOriginal = name && length ? [{ length, path: name }, ...files] : files;
+		const rebuildFiles = files.map((file) => {
+			const keys = Object.keys(file),
+				newFile = {};
 
-		if (!invalid.length > 0 && files.length > 0) {
+			if ('path.utf8' in file) {
+				file.path = file['path.utf8'];
+			}
+			keys.forEach((k) => {
+				newFile[k] = config.crawler.reserveValue.indexOf(k) > -1 ? file[k] || '' : '';
+			});
+			return newFile;
+		});
+		const names = rebuildFiles.map(({ path }) => (Array.isArray(path) ? path.join('/') : path)).concat(name);
+		const invalid = filterTorrent(names);
+		const filesWithOriginal = name && length ? [{ length, path: name }, ...rebuildFiles] : rebuildFiles;
+
+		if (!invalid.length > 0 && rebuildFiles.length > 0) {
 			buildRecord(names, knex, { files: filesWithOriginal, infohash, name });
 		}
 	} catch (error) {

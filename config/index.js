@@ -13,8 +13,9 @@ const config = {
 		bulkFreq: 20,
 		enableBulk: true,
 		frequency: 4,
-		parseHexKeys: ['ed2k', 'filehash', 'sha1'],
+		parseHexKeys: ['ed2k', 'filehash', 'sha1', 'sha32'],
 		port: 6881,
+		reserveValue: ['ed2k', 'filehash', 'sha1', 'sha32', 'length', 'path'],
 	},
 	db: {
 		/*
