@@ -177,7 +177,7 @@ const onMetadata = function onMetadata(metadata, infohash, knex) {
 				file.path = file[utfKey];
 			}
 			keys.forEach((k) => {
-				newFile[k] = config.crawler.reserveValue.indexOf(k) > -1 ? file[k] || '' : '';
+				newFile[k] = config.crawler.reserveValue.indexOf(k) > -1 ? file[k] : '';
 			});
 			return newFile;
 		});
