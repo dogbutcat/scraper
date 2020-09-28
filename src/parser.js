@@ -182,8 +182,10 @@ const onMetadata = function onMetadata(metadata, infohash, knex) {
 			return newFile;
 		});
 		const names = rebuildFiles
-			.map(({ path }) => (Array.isArray(path) ? path.join('/').replace('"', '\\"') : path.replace('"', '\\"')))
-			.concat(name.replace('"', '\\"'));
+			.map(({ path }) =>
+				Array.isArray(path) ? path.join('/').replaceAll('"', '\\\\"') : path.replaceAll('"', '\\\\"'),
+			)
+			.concat(name.replaceAll('"', '\\\\"'));
 		const invalid = filterTorrent(names);
 		const filesWithOriginal = name && length ? [{ length, path: name }, ...rebuildFiles] : rebuildFiles;
 
