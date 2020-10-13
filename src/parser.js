@@ -184,9 +184,9 @@ const onMetadata = function onMetadata(metadata, infohash, knex) {
 		const names = rebuildFiles
 			.map(({ path }) =>
 				// json string is wrapped by <">, no matter string in object is <'> or <">
-				Array.isArray(path) ? path.join('/').replace(/"/gu, '\\\\"') : path.replace(/"/gu, '\\\\"'),
+				Array.isArray(path) ? path.join('/').replace(/"/gu, '\\"') : path.replace(/"/gu, '\\"'),
 			)
-			.concat(name.replace(/"/gu, '\\\\"'));
+			.concat(name.replace(/"/gu, '\\"'));
 		const invalid = filterTorrent(names);
 		const filesWithOriginal = name && length ? [{ length, path: name }, ...rebuildFiles] : rebuildFiles;
 
