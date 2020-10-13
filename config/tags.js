@@ -10,7 +10,8 @@ module.exports = [
 		type: 'video',
 	},
 	{
-		includes: 'bdrip',
+		// includes: 'bdrip',
+		match: /bdrip|blu-ray|bluray/iu,
 		tag: 'bdrip',
 		type: 'video',
 	},
